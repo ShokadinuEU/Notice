@@ -2,12 +2,7 @@ import React ,{Component} from 'react'
 import {Link} from 'react-router-dom'
 import Navigation from './Navigation'
 import Circle from './Circle'
-import Patrat from './Patrat'
 import {Row, Col, Button, ListGroup, ListGroupItem} from 'react-bootstrap'
-
-import Draggable from 'react-draggable';
-
-
 import '../style/GuestPage.css'
 
 class GuestsPage extends Component{
@@ -19,8 +14,9 @@ class GuestsPage extends Component{
 
             guests: [],
             tables: [],
-            search: '',
-            points: 5
+            asezati: [],
+            draggedGUest: {},
+            search: ''
         }
     }
 
@@ -48,11 +44,6 @@ class GuestsPage extends Component{
     componentDidMount(){
 
         this.fetchGuests()
-        
-    }
-    handleDrag(){
-
-        console.log("BINEEE")
     }
 
     handleSearch = (event)=>{
@@ -81,19 +72,92 @@ class GuestsPage extends Component{
         e.preventDefault()
     }
 
+    onDragOver = e =>{
+
+        e.preventDefault()
+    }
+
+    onDrag = (ev, guest) =>{
+
+        ev.preventDefault()
+        this.setState({
+
+            draggedGUest: guest
+        })
+    }
+
+    onDrop = (e, id)=>{
+        let url = '/guests'
+       const {asezati, draggedGUest, guests} = this.state
+
+       this.setState({
+
+        asezati: [...asezati, draggedGUest],
+        guests: guests.filter(guest => guest._id !==draggedGUest._id),
+        draggedGUest: {}
+       }, function(){
+
+        console.log("Asezati",this.state.asezati)
+
+        this.state.tables.map((table)=>{
+           
+            if(table._id === id){
+
+                table.people.push(draggedGUest)
+                
+                let data = {
+
+                    asezati: table.people,
+                    id: table._id
+                }
+
+                let p = parseInt(data.asezati.length)
+                let q = parseInt(table.number_of_people)
+
+                if(p === q){
+
+                    console.log("Masa e plina, nu mai pot sa adaug")
+                    return
+                   
+                }
+                else{
+
+                    console.log("Mai poti sa adaugi oameni la masa")
+                }
+
+                fetch(url,{
+
+                    method: 'PUT',
+                    credentials: 'include',
+                    body: JSON.stringify(data),
+                    headers: new Headers({'Content-Type': 'application/json'})
+                    },{ credentials: 'include'})
+                    .then(res => {         
+                        res.json()
+                        this.props.history.push('/guests')
+                    })               
+            }
+            
+            return asezati
+        })
+ 
+       })
+
+       e.preventDefault()
+    }
+
     render(){
         let filterGuests = this.state.guests.filter((guests) =>{
 
             return guests.name.indexOf(this.state.search) !== -1
         })
-// {Array.from(Array(this.state.points)).map((x, index) => <Circle key={index} />)}
-// {Array.from(Array(this.state.points)).map((x, index) => <Patrat key={index} />)}
-        return(
+        return(    
                     <div>
                             <Navigation />
                             <div>
                             <div className="logout_button">
                                 <Button bsSize="large" bsStyle="danger" onClick={this.logOut}>Log out</Button>
+                                <h1>{this.state.message}</h1>
                             </div>
                                 <Row>
                                     <Col xs={12} md={12}>
@@ -104,16 +168,13 @@ class GuestsPage extends Component{
                                             </div>
                                                           
                                                     {this.state.tables.map((table, i)=>(
-                                                        <div key={table._id}>
-                                                        
-                                                            <Circle numberTable={table.number}/>                                                            
-                                                            {Array(6).fill(<Patrat />)}
-                                                            
-                                                        </div>
-                                                    ))}
-                                                    
+                                                               
+                                                                <div key = {i} className="center" onDrop={(e)=> this.onDrop(e, table._id)} onDragOver={(e)=>this.onDragOver(e)}>
+                                                                
+                                                                    <Circle key={table._id} numberTable={table.number} numberPeople = {table.number_of_people} asezati={table.people}/>
 
-                                                    
+                                                                </div>                                                                                                                                                                                 
+                                                   ))}                                                                                        
                                             </Col>
                                             <Col xs={3} md={2}>
                                                     <div>
@@ -126,24 +187,18 @@ class GuestsPage extends Component{
                                                         /> 
                                                             <ListGroup >                                                              
                                                                 {filterGuests.map((guests)=>(
-                                                                    <Draggable
-                                                                        onDrag={this.handleDrag}
-                                                                        bounds={{left:-1700, top:10, right:0, bottom: 1000}}
-                                                                        key={guests._id}
-                                                                    >
-                                                                        <ListGroupItem ><h4>{guests.name} &nbsp;&nbsp; {guests.status}</h4></ListGroupItem>
-                                                                    </Draggable>
+                                                                   
+                                                                    <ListGroupItem onDrag={(e)=>this.onDrag(e, guests)} draggable key={guests._id}><h4>{guests.name} &nbsp;&nbsp; {guests.status}</h4></ListGroupItem>
                                                                 ))}
-                                                            </ListGroup>                                                       
-                                                        </div>
-                                                    
+                                                            </ListGroup>
+                                                                                                                  
+                                                        </div>         
                                             </Col>
                                         </Row>                              
                                     </Col>
                                 </Row>
                             </div>
                     </div>
-
         )
     }
 }
