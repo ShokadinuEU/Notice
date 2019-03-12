@@ -14,7 +14,7 @@ class RegisterContainer extends React.Component{
             password: '',
             name: '',
             age:'',
-            message:''
+            message:'',
 
         }
 
@@ -34,7 +34,6 @@ class RegisterContainer extends React.Component{
         })
         .then(res => res.json())
         .then(data => {
-
             if(data.email === ''){
 
                 this.setState({
@@ -43,7 +42,7 @@ class RegisterContainer extends React.Component{
                 })
             }
             else{
-                this.props.history.push("/admin") 
+                this.props.history.push("/") 
             }
         })
 
@@ -65,6 +64,14 @@ class RegisterContainer extends React.Component{
         this.setState({
 
             password: e.target.value
+        })
+    }
+
+    onChangeHandler = event =>{
+
+        this.setState({
+
+            selectedFile: event.target.files[0]
         })
     }
 
@@ -106,6 +113,7 @@ class RegisterContainer extends React.Component{
                                         <FormControl
                                             type="text"
                                             name="name"
+                                            autoComplete="name"
                                             value={this.state.name}
                                             placeholder="Name"
                                             onChange={this.handleEvent}
@@ -127,6 +135,7 @@ class RegisterContainer extends React.Component{
                                         <FormControl
                                             type="number"
                                             name="age"
+                                            autoComplete="age"
                                             value={this.state.age}
                                             placeholder="Age"
                                             onChange={this.handleEvent}
@@ -148,6 +157,7 @@ class RegisterContainer extends React.Component{
                                         <FormControl
                                             type="email"
                                             name="email"
+                                            autoComplete="email"
                                             value={this.state.email}
                                             placeholder="Email"
                                             onChange={this.handleEvent}
@@ -173,6 +183,7 @@ class RegisterContainer extends React.Component{
                                             <FormControl
                                                 type="password"
                                                 name="password"
+                                                autoComplete="password"
                                                 value={this.state.password}
                                                 placeholder="Password"
                                                 onChange={this.handleEvent}
