@@ -122,6 +122,11 @@ class TaskPage extends React.Component{
         }
     }
 
+    onDrop(data) {
+        console.log(data)
+        // => banana 
+    }
+
     render(){
         return(
           
@@ -165,7 +170,7 @@ class TaskPage extends React.Component{
                                                                     <td>{tasks.description}</td>
                                                                     <td><Moment format="YYYY/MM/DD">{tasks.date}</Moment></td>
                                                                     <td>{tasks.time}</td>
-                                                                    <td><Button onClick={()=> this.deleteTask(tasks._id)} bsStyle="danger">Delete <i className="fas fa-trash-alt"></i></Button></td>
+                                                                    <td><Button onClick={()=> window.confirm("Are you sure you wish to delete this item?") && this.deleteTask(tasks._id)} bsStyle="danger">Delete <i className="fas fa-trash-alt"></i></Button></td>
                                                                     <td><Button onClick={()=> this.editNotice(tasks._id)} bsStyle="warning">Edit <i className="fas fa-edit"></i></Button></td>
                                                                 </tr>
                                                         )
@@ -181,8 +186,7 @@ class TaskPage extends React.Component{
                     </div>
                     <div className="notask">
                         {this.state.isVisible && <h3>{this.state.message}</h3>}
-                    </div> 
-                                       
+                    </div>             
             </div>
                           
         )
